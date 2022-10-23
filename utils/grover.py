@@ -1,8 +1,8 @@
 # import sys
 # sys.path.append('../')
+import numpy as np
 from qiskit import QuantumCircuit
 from utils.misc import basis_change
-import numpy as np
 
 def state_parser(state):
     if isinstance(state,int):
@@ -10,7 +10,7 @@ def state_parser(state):
     elif isinstance(state,str):
         state = [*map(int,state)]
     elif isinstance(state,list):
-        pass
+        assert np.all([isinstance(x,int) for x in state])
     elif isinstance(state,np.ndarray):
         state = state.tolist()
     else:
@@ -49,14 +49,20 @@ def get_grover_op(oracle):
 def GroverSolver(good_states):
 
     m = len(good_states) #no_of_solutions
-    assert m>0
-    states = [*map(state_parser,good_states)]
-    assert len(set(tuple(i) for i in states)) == len(states), 'Multiple identical "good" states were given!'
-    n = max([*map(len,states)])
-    while 2*m >= 2**n:
-        n+=1
-    states = [*map(lambda x: [0]*(n-len(x)) + x,states)]
-    # n_min = min([*map(lambda x: n - x.index(1),states)])
+    # assert m>0
+    if m == 0:
+         n = 2
+         states = []
+         t = 0
+    else:
+        states = [*map(state_parser,good_states)]
+        assert len(set(tuple(i) for i in states)) == len(states), f'Multiple identical "good" states were given!: {states}'
+        n = max([*map(len,states)])
+        while 2*m >= 2**n:
+            n+=1
+        states = [*map(lambda x: [0]*(n-len(x)) + x,states)]
+        # n_min = min([*map(lambda x: n - x.index(1),states)])
+        t = get_t(n,no_of_expected_solutions=len(states))
 
     circ = QuantumCircuit(n)
     circ.h(circ.qubits)
@@ -71,7 +77,7 @@ def GroverSolver(good_states):
 
     grover = get_grover_op(oracle=oracle)
     
-    t = get_t(n,no_of_expected_solutions=len(states))
+    
     for _ in range(t):
         circ.append(grover.to_gate(),circ.qubits)
 
