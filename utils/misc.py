@@ -1,3 +1,6 @@
+# Author: Ahmet Ege Yilmaz
+# Year: 2022
+# Some useful stuff
 
 import qiskit
 from qiskit import QuantumCircuit
@@ -16,5 +19,3 @@ def basis_change(circ,gate_name):
     # qc.append(circ,qc.qubits)
     getattr(qc,gate_name)(qc.qubits)
     return qc
-
-def ORGate():...

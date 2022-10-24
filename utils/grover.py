@@ -1,5 +1,7 @@
-# import sys
-# sys.path.append('../')
+# Author: Ahmet Ege Yilmaz
+# Year: 2022
+# Grover's Algorithm
+
 import numpy as np
 from qiskit import QuantumCircuit
 from utils.misc import basis_change

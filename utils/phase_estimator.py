@@ -1,3 +1,7 @@
+# Author: Ahmet Ege Yilmaz
+# Year: 2022
+# Quantum Phase Estimation
+
 import math
 from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import PhaseEstimation

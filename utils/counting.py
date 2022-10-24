@@ -1,3 +1,7 @@
+# Author: Ahmet Ege Yilmaz
+# Year: 2022
+# Quantum Counting.
+
 import math
 from qiskit import QuantumCircuit
 from utils.phase_estimator import get_phase_estimator, get_phase_estimation, get_t

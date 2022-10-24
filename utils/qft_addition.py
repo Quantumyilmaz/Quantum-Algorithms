@@ -1,3 +1,7 @@
+# Author: Ahmet Ege Yilmaz
+# Year: 2021
+# QFT Addition
+
 from qiskit.circuit.library import QFT
 import numpy as np
 from qiskit import execute
