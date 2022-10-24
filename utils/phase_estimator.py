@@ -3,6 +3,14 @@ from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import PhaseEstimation
 from utils.misc import simulator,execute_circ
 
+
+def get_t(bit_accuracy,success_chance):
+
+    eps = 1 - success_chance
+    t = math.ceil(bit_accuracy + math.log2(2+1/(2*eps)))
+    
+    return t
+
 def get_phase_estimator(eig_state,unitary,t):
     """
     - eig_state: represents the quantum state, whose eigenvalue is e^(i*2*pi*theta)
@@ -25,4 +33,6 @@ def get_phase_estimation(eig_state,unitary,t):
     
     counts = execute_circ(circuit,simulator).get_counts(circuit)
 
-    return {'phase':int(max(counts,key=counts.get)[::-1],2)/2**t,'counts':counts,'circuit':circuit}
+    return {'phase':2 * math.pi * int(max(counts,key=counts.get)[::-1],2)/2**t,
+                'counts':counts,
+                    'circuit':circuit}

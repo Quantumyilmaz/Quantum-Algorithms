@@ -16,3 +16,5 @@ def basis_change(circ,gate_name):
     # qc.append(circ,qc.qubits)
     getattr(qc,gate_name)(qc.qubits)
     return qc
+
+def ORGate():...

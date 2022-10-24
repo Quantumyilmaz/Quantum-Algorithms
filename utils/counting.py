@@ -1,6 +1,6 @@
 import math
 from qiskit import QuantumCircuit
-from utils.phase_estimator import get_phase_estimator, get_phase_estimation
+from utils.phase_estimator import get_phase_estimator, get_phase_estimation, get_t
 
 def get_eigstate(n):
     
@@ -8,13 +8,6 @@ def get_eigstate(n):
     eig_state.h(eig_state.qubits)
 
     return eig_state
-
-def get_t(bit_accuracy,success_chance):
-
-    eps = 1 - success_chance
-    t = math.ceil(bit_accuracy + math.log2(2+1/(2*eps)))
-    
-    return t
 
 def get_counter(bit_accuracy,success_chance,grover_op):
     
@@ -34,7 +27,7 @@ def get_count(bit_accuracy,success_chance,grover_op):
 
     results = get_phase_estimation(eig_state,grover_op,t)
     
-    theta = 2 * math.pi * results['phase']
+    theta = results['phase']
 
     N = 2**n
     M = N * math.cos(theta/2)**2
