@@ -28,7 +28,7 @@ def get_count(bit_accuracy,success_chance,grover_op):
     n = len(grover_op.qubits)
     eig_state = get_eigstate(n)
     t = get_t(bit_accuracy,success_chance)
-    assert t + n < 11, t + n
+    assert t + n < 12, t + n
 
     # print('t: ',t,'n: ',n)
 
