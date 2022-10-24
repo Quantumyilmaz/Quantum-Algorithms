@@ -19,6 +19,8 @@ def OR(n_qubits,to_gate=True):
         circ = circ.to_gate()
     return circ
 
+def larger_than(a,b):...
+
 
 ######## OR check ################################################################
 # n = 3
