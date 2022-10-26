@@ -10,8 +10,8 @@ from qiskit import QuantumCircuit
 from qiskit.circuit.library import QFT
 
 
-def OR(n_qubits,to_gate=True):
-    n = n_qubits+1
+def ORGate(n_qubits,to_gate=True):
+    n = n_qubits+1 # last one is the output/readout qubit
     circ = QuantumCircuit(n)
     for i in range(n_qubits):
         circ.cx(i,-1)
@@ -53,18 +53,6 @@ def SubtractGate(n,subtract_this):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 ######## OR check ################################################################
 # n = 3
 # for i in range(n+1):
@@ -78,7 +66,7 @@ def SubtractGate(n,subtract_this):
 #             if k:
 #                 circ.x(i)
 
-#         circ.compose(OR(n),circ.qubits,inplace=True)
+#         circ.compose(ORGate(n),circ.qubits,inplace=True)
 #         circ.measure(-1,cbit=0)
 
 #         ans = list(execute_circ(circ,backend=simulator).get_counts().keys())
@@ -86,3 +74,68 @@ def SubtractGate(n,subtract_this):
 #         assert int(ans[0]) == expected_answer , ans
 #         print(tuple_,comb,ans)
 #################################################################################
+
+
+
+
+
+
+def qand():
+     # A, B, _ -> A, B, A&B
+     circ = QuantumCircuit(3)
+     circ.mcx([0,1],-1)
+     return circ.to_gate()
+
+def qnot():
+     # A-> ~A
+     circ = QuantumCircuit(1)
+     circ.x(0)
+     return circ.to_gate()
+
+def qxnor():
+     # A, B -> A, ~A^B
+     circ = QuantumCircuit(2)
+     circ.cx(0,1)
+     circ.x(1)
+     return circ.to_gate()
+
+def qless():
+     # A, B, _ -> A, B, A<B
+     circ = QuantumCircuit(3)
+     circ.compose(qnot(), 0, inplace=True)
+     circ.compose(qand(), inplace=True)
+     circ.compose(qnot(), 0, inplace=True)
+     return circ.to_gate()
+
+def qgreater():
+     # A, B, _ -> A, B, A>B
+     circ = QuantumCircuit(3)
+     circ.compose(qnot(), 1, inplace=True)
+     circ.compose(qand(), inplace=True)
+     circ.compose(qnot(), 1, inplace=True)
+     return circ.to_gate()
+
+def qswap():
+     circ = QuantumCircuit(2)
+     # IMPLEMENT HERE
+     return circ.to_gate()
+
+def qcomparator():
+     circ = QuantumCircuit(5)
+     circ.compose(qless(), [0,1,2], inplace=True)      
+     # A, B, _ ->  A,B, A<B
+     circ.compose(qgreater(), [0,1,3], inplace=True)   
+     # A, B, _ ->  A,B, A>B
+     circ.compose(qswap(), [2,4], inplace=True)
+     circ.compose(qxnor(), [0,4], inplace=True)
+     return circ.to_gate() # sonuc: A, B, A<B, A>B, A=B
+
+
+
+
+
+
+
+
+
+
