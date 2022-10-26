@@ -40,3 +40,15 @@ def get_phase_estimation(eig_state,unitary,t):
     return {'phase':2 * math.pi * int(max(counts,key=counts.get)[::-1],2)/2**t,
                 'counts':counts,
                     'circuit':circuit}
+
+def get_phase(eig_state,unitary,t):
+    return get_phase_estimation(eig_state,unitary,t)['phase']
+
+
+
+"""
+circ = QuantumCircuit(1)
+circ.x(0)
+theta = 2*math.pi-1e-2
+get_phase_estimation(circ,PhaseGate(theta),get_t(8,0.8))['phase']
+"""

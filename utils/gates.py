@@ -3,8 +3,12 @@
 # Some useful gates
 
 from itertools import combinations
+import math
+
+from utils.misc import basis_change,encode_integer
 
 from qiskit import QuantumCircuit
+from qiskit.circuit.library import QFT
 
 
 def OR(n_qubits,to_gate=True):
@@ -19,7 +23,39 @@ def OR(n_qubits,to_gate=True):
         circ = circ.to_gate()
     return circ
 
+def AddGate(n,add_this):
+    additionGate = QuantumCircuit(2*n)
+    
+    counter = n
+    while counter:
+        for i in range(counter):
+            additionGate.cp(2*math.pi/2**(i+1),2*n-counter+i, n-counter)
+        counter -= 1
+    
+    additionGate = basis_change(additionGate,QFT(n).to_gate(),range(n),True)
+    
+    AddThis = encode_integer(add_this,reverse=False)
+
+    return basis_change(additionGate,AddThis.to_gate(),range(2*n-AddThis.num_qubits,2*n)).to_gate()
+
+def SubtractGate(n,subtract_this):
+    return AddGate(n,subtract_this).inverse()
+
 def larger_than(a,b):...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ######## OR check ################################################################
