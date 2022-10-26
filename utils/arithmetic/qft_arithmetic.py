@@ -8,7 +8,6 @@ from utils.gates import AddGate,SubtractGate
 from utils.misc import encode_integer, get_counts, counts_to_integer
 
 from qiskit import QuantumCircuit
-from qiskit.circuit.library import QFT
 
 """
 qft_adder_to_integer(qft_adder(20,5,n=10,to_gate=False))
