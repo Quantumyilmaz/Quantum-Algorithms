@@ -2,6 +2,7 @@
 # Year: 2022
 # Some useful stuff
 
+import math
 import numpy as np
 
 import qiskit
@@ -66,3 +67,14 @@ def get_counts(circ,qubits):
 
 def counts_to_integer(counts):
     return int(max(counts,key=counts.get),2)
+
+def matrix_to_gate(unitary_mat,to_gate=True):
+    # unitary matrix -> quantum gate
+    
+    assert len(unitary_mat.shape)==2 and unitary_mat.shape[0] == unitary_mat.shape[1]
+    n = math.log2(unitary_mat.shape[0])
+    assert n == int(n)
+    circ = QuantumCircuit(n)
+    circ.unitary(unitary_mat,circ.qubits)
+
+    return circ.to_gate() if to_gate else circ
