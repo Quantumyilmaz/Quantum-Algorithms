@@ -23,7 +23,7 @@ def state_parser(state):
     return state
 
 # No of Grover reflections
-def get_t(n,no_of_expected_solutions):
+def get_t_grover(n,no_of_expected_solutions):
     N = 2**n
     theta = np.arcsin(np.sqrt(no_of_expected_solutions/N))
     t = 0.5*(np.pi/(2*theta)-1) # No of Grover reflections
@@ -64,7 +64,7 @@ def GroverSolver(good_states):
             n+=1
         states = [*map(lambda x: [0]*(n-len(x)) + x,states)]
         # n_min = min([*map(lambda x: n - x.index(1),states)])
-        t = get_t(n,no_of_expected_solutions=len(states))
+        t = get_t_grover(n,no_of_expected_solutions=len(states))
 
     circ = QuantumCircuit(n)
     circ.h(circ.qubits)

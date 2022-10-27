@@ -8,7 +8,7 @@ import numpy as np
 
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import QFT
-from qiskit.circuit.library import PhaseGate,PhaseEstimation
+from qiskit.circuit.library import PhaseEstimation
 
 
 def ORGate(n_qubits,to_gate=True):
@@ -105,8 +105,8 @@ def LessThanGate(n,to_gate=True):
     
     return circ.to_gate() if to_gate else circ
 
-def PhaseEstimatorGate(phase,t):
-     return PhaseEstimation(t,PhaseGate(phase)).reverse_bits().to_gate()
+def PhaseEstimatorGate(unitary,t):
+     return PhaseEstimation(t,unitary).reverse_bits().to_gate()
 
 
 

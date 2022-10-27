@@ -65,7 +65,8 @@ get_phase_estimation(eig_state=eig_state,unitary=unitary,t=get_t(bit_accuracy=10
 
 
 """
-Compare 2 phases:
+Compare 2 phases
+------------------------------------------------
 
 eig_state1 = QuantumCircuit(1)
 eig_state1.x(0)
@@ -108,4 +109,27 @@ eig_state.compose(PhaseEstimatorGate(theta,t),range(n),inplace=True)
 eig_state.draw()
 
 2*math.pi*counts_to_integer(get_counts(circ=eig_state,qubits=[*range(1,n)]))/2**t
+"""
+
+
+
+"""
+Uniformly randomly yields one of the phases
+------------------------------------------------
+phases = [0.1,0.2,0.3,0.4]
+
+unitary = np.diag([np.e**(i*1j) for i in phases])
+unitary = matrix_to_gate(unitary_mat=unitary,to_gate=True)
+
+n=10
+n_state = 2
+circ = QuantumCircuit(n)
+circ.h(circ.qubits[:n_state])
+# circ.compose(unitary,circ.qubits[:n_state],inplace=True)
+t = get_t(4,0.8)
+circ.compose(PhaseEstimatorGate(unitary,t),inplace=True)
+circ.draw()
+
+2*math.pi*counts_to_integer(get_counts(circ,[*range(n_state,n_state+t)]))/2**t
+
 """
