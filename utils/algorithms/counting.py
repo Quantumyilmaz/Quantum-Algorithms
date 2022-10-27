@@ -4,7 +4,7 @@
 
 import math
 from qiskit import QuantumCircuit
-from utils.phase_estimator import get_phase_estimator, get_phase_estimation, get_t
+from utils.algorithms.phase_estimator import get_phase_estimator, get_phase_estimation, get_t
 
 def get_eigstate(n):
     
@@ -13,24 +13,28 @@ def get_eigstate(n):
 
     return eig_state
 
-def get_counter(bit_accuracy,success_chance,grover_op):
+def get_counter(bit_accuracy,success_chance,grover_op,eig_state=None):
     
-    eig_state = get_eigstate(len(grover_op.qubits))
+    if eig_state is None:
+        eig_state = get_eigstate(len(grover_op.qubits))
     t = get_t(bit_accuracy,success_chance)
 
     return get_phase_estimator(eig_state,grover_op,t)
 
-def get_count(bit_accuracy,success_chance,grover_op):
+def get_count(bit_accuracy,success_chance,grover_op,eig_state=None,n=None):
 
-    n = len(grover_op.qubits)
-    eig_state = get_eigstate(n)
+    if n is None:
+        n = len(grover_op.qubits)
+    if eig_state is None:
+        eig_state = get_eigstate(n)
     t = get_t(bit_accuracy,success_chance)
-    assert t + n < 12, t + n
+    assert t + grover_op.num_qubits < 26, t + grover_op.num_qubits
 
-    # print('t: ',t,'n: ',n)
+    print('t: ',t,'grover_op.num_qubits: ',grover_op.num_qubits)
 
     results = get_phase_estimation(eig_state,grover_op,t)
     
+    # It gives pi +/- (theoretical) theta bcs we are using -U_s in Grover. The plus/minus comes from the positive/negative phased eigenvalue
     theta = results['phase']
 
     N = 2**n
