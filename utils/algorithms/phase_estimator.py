@@ -53,6 +53,7 @@ theta = 2*math.pi-1e-2
 get_phase_estimation(circ,PhaseGate(theta),get_t(8,0.8))['phase']
 """
 
+
 """
 phases = [0.1,0.2,0.3,0.4]
 unitary = np.diag([np.e**(i*1j) for i in phases])
@@ -93,6 +94,7 @@ int(max(counts,key=counts.get))
 # get_counts(circ=circ,qubits=[*range(1,t+1)]+[*range(t+1+1,2*t+1+1)])
 
 """
+
 
 """
 theta = 1
