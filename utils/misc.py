@@ -50,6 +50,17 @@ def encode_integer(integer,reverse=False):
         qc.x(i)
     return qc
 
+def prepare_integers(n,integers,to_gate=True):
+
+    circ = QuantumCircuit(len(integers)*n)
+
+    for i,integer in enumerate(integers):
+        # assert n>=len(np.binary_repr(integer))
+        circ_integer = encode_integer(integer)
+        circ.compose(circ_integer.to_gate(),range(i*n,i*n+circ_integer.num_qubits),inplace=True)
+    
+    return circ.to_gate() if to_gate else circ
+
 def get_counts(circ,qubits):
     return execute_circ(circ,qubits).get_counts()
 

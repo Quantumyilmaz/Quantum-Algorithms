@@ -50,7 +50,39 @@ def SubtractGate(n,subtract_this):
     return AddGate(n=n,add_this=subtract_this).inverse()
 
 
+def GreaterThanGate(n,to_gate=True):
+    
+    circ = QuantumCircuit(2*n+1)
+    
+    for i in range(n):
+        circ.cx(i,i+n)
+    
+    circ.mcx([n-1,2*n-1],-1)
+    for i in range(1,n):
+        circ.x(2*n-i)
+        circ.mcx([n-1-i]+[*range(2*n-1-i,2*n)],-1)
+    
+    circ.x(range(n+1,2*n))
+    
+    for i in range(n):
+        circ.cx(i,i+n)
+    
+    return circ.to_gate() if to_gate else circ
 
+def EqualsGate(n,to_gate=True):
+    
+    circ = QuantumCircuit(2*n+1)
+
+    for i in range(n):
+        circ.cx(i,i+n)
+
+    circ.x(-1)
+    circ.compose(ORGate(n_qubits=n,to_gate=True),range(n,2*n+1),inplace=True)
+    
+    for i in range(n):
+        circ.cx(i,i+n)
+
+    return circ.to_gate() if to_gate else circ
 
 
 ######## OR check ################################################################

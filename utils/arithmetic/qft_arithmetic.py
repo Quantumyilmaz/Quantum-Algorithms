@@ -5,12 +5,12 @@
 import numpy as np
 
 from utils.gates import AddGate,SubtractGate
-from utils.misc import encode_integer, get_counts, counts_to_integer
+from utils.misc import encode_integer, get_counts, counts_to_integer, prepare_integers
 
 from qiskit import QuantumCircuit
 
 """
-qft_adder_to_integer(qft_adder(20,5,n=10,to_gate=False))
+qft_arithmetic_to_integer(qft_adder(20,5,n=10,to_gate=False))
 """
 
 def qft_adder(add_to,add_this, n=10, to_gate=True, draw_barriers=False):
@@ -28,31 +28,20 @@ def qft_adder(add_to,add_this, n=10, to_gate=True, draw_barriers=False):
 
 
 """
-qft_subtractor_to_integer(qft_subtractor(12,5,n=4,to_gate=False))
+qft_arithmetic_to_integer(qft_subtractor(12,5,n=4,to_gate=False))
 """
 
-def qft_subtractor(subtract_from, subtract_this, n=None, to_gate=True):
+def qft_subtractor(subtract_from, subtract_this, n=10, to_gate=True):
 
-    assert subtract_from - subtract_this >= 0
-
-    n_ = len(np.binary_repr(subtract_from))
-    if n is None:
-        n = n_
-    else:
-        assert n >= n_
+    assert subtract_from >= subtract_this
 
     qc = QuantumCircuit(2*n,name= f"subtract {subtract_this}" + bool(subtract_from)*f" from {subtract_from}")
 
-    SubtractFromThis = encode_integer(subtract_from)
-    qc.compose(SubtractFromThis.to_gate(),range(SubtractFromThis.num_qubits),inplace=True)
-
+    qc.compose(prepare_integers(n=n,integers=[subtract_from],to_gate=True),inplace=True)
     qc.compose(SubtractGate(n,subtract_this),inplace=True)
 
     return qc.to_gate() if to_gate else qc
 
 
-
-
-def qft_arithmetic_to_integer(qc):
-    circ = qc.copy()
-    return counts_to_integer(get_counts(circ,circ.qubits[:circ.num_qubits//2]))
+def qft_arithmetic_to_integer(circ):
+    return counts_to_integer(get_counts(circ.copy(),circ.qubits[:circ.num_qubits//2]))
