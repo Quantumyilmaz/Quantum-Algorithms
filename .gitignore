@@ -6,5 +6,4 @@ schmierblatt.ipynb
 utils/__pycache__/
 utils/algorithms/__pycache__/
 utils/backups/
-utils/arithmetic/backups/__pycache__/qft_addition_25_10_22.cpython-310.pyc
-utils/arithmetic/backups/qft_addition_25_10_22.py
+utils/arithmetic/backups/
