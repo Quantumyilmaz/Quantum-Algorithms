@@ -33,6 +33,7 @@ def get_t_grover(n,no_of_expected_solutions):
     return round(t)
 
 def get_diffuser(n):
+    # Find out why it does not work, if the qubits are not consecutively placed.
     qc = QuantumCircuit(n)
     qc.h(-1)
     qc.mct(qc.qubits[:-1],-1)
@@ -40,6 +41,30 @@ def get_diffuser(n):
     qc = basis_change(qc,'x')
     qc = basis_change(qc,'h')
     return qc
+
+# def get_diffuser(nqubits):
+#     qc = QuantumCircuit(nqubits)
+#     # Apply transformation |s> -> |00..0> (H-gates)
+#     for qubit in range(nqubits):
+#         qc.h(qubit)
+#     # Apply transformation |00..0> -> |11..1> (X-gates)
+#     for qubit in range(nqubits):
+#         qc.x(qubit)
+#     # Do multi-controlled-Z gate
+#     qc.h(nqubits-1)
+#     qc.mct(list(range(nqubits-1)), nqubits-1)  # multi-controlled-toffoli
+#     qc.h(nqubits-1)
+#     # Apply transformation |11..1> -> |00..0>
+#     for qubit in range(nqubits):
+#         qc.x(qubit)
+#     # Apply transformation |00..0> -> |s>
+#     for qubit in range(nqubits):
+#         qc.h(qubit)
+#     return qc
+#     # We will return the diffuser as a gate
+#     U_s = qc.to_gate()
+#     U_s.name = "U$_s$"
+#     return U_s
 
 def get_grover_op(oracle):
     n = len(oracle.qubits)

@@ -62,8 +62,8 @@ def prepare_integers(n,integers,to_gate=True):
     
     return circ.to_gate() if to_gate else circ
 
-def get_counts(circ,qubits):
-    return execute_circ(circ,qubits).get_counts()
+def get_counts(circ,qubits,**kwargs):
+    return execute_circ(circ,qubits,**kwargs).get_counts()
 
 def counts_to_integer(counts):
     return int(max(counts,key=counts.get),2)

@@ -8,10 +8,10 @@ from qiskit.circuit.library import PhaseEstimation
 from utils.misc import simulator,execute_circ
 
 
-def get_t(bit_accuracy,success_chance):
-
-    eps = 1 - success_chance
-    t = math.ceil(bit_accuracy + math.log2(2+1/(2*eps)))
+def get_t(bit_accuracy,min_success_chance):
+    # bit_accuracy: n-bit approx.
+    eps = 1 - min_success_chance
+    t = bit_accuracy + math.ceil(math.log2(2+1/(2*eps)))
     
     return t
 
