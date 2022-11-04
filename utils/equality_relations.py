@@ -1,3 +1,6 @@
+# Author: Ahmet Ege Yilmaz
+# Year: 2022
+# Equality and inequalities.
 
 from utils.gates import GreaterThanGate, EqualsGate, LessThanGate
 from utils.misc import prepare_integers
