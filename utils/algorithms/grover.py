@@ -33,7 +33,7 @@ def get_t_grover(n,no_of_expected_solutions):
     return round(t)
 
 def get_diffuser(n):
-    # Find out why it does not work, if the qubits are not consecutively placed.
+    # TODO Find out why it does not work, if the qubits are not consecutively placed.
     qc = QuantumCircuit(n)
     qc.h(-1)
     qc.mct(qc.qubits[:-1],-1)
