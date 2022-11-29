@@ -28,7 +28,7 @@ def get_t_grover(n,no_of_expected_solutions):
 
     N = 2**n
     theta = 2*np.arcsin(np.sqrt(no_of_expected_solutions/N))
-    t = 0.5*(np.pi/theta-1) # No of Grover reflections
+    t = 0.5 * (np.pi/theta-1) # No of Grover reflections
     # t_min_max = np.array([np.floor(t),np.ceil(t)])
     # t = t_min_max[np.argmin(np.abs(np.pi/2 - (2*t_min_max + 1) * theta))]
     # return int(t)
