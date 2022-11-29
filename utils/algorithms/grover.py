@@ -24,9 +24,11 @@ def state_parser(state):
 
 # No of Grover reflections
 def get_t_grover(n,no_of_expected_solutions):
+    # How many rotation angles (theta) fit inside the difference between the starting angle (theta/2) and the desired angle (pi/2)
+
     N = 2**n
-    theta = np.arcsin(np.sqrt(no_of_expected_solutions/N))
-    t = 0.5*(np.pi/(2*theta)-1) # No of Grover reflections
+    theta = 2*np.arcsin(np.sqrt(no_of_expected_solutions/N))
+    t = 0.5*(np.pi/theta-1) # No of Grover reflections
     # t_min_max = np.array([np.floor(t),np.ceil(t)])
     # t = t_min_max[np.argmin(np.abs(np.pi/2 - (2*t_min_max + 1) * theta))]
     # return int(t)
