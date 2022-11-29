@@ -22,9 +22,10 @@ def get_counter(bit_accuracy,success_chance,grover_op,eig_state=None):
     return get_phase_estimator(eig_state,grover_op,t)
 
 def get_count(bit_accuracy,success_chance,grover_op,eig_state=None,n=None):
+    # M must be smaller than N/2 !
 
     if n is None:
-        n = len(grover_op.qubits)
+        n = grover_op.num_qubits
     if eig_state is None:
         eig_state = get_eigstate(n)
     t = get_t(bit_accuracy,success_chance)
@@ -40,6 +41,7 @@ def get_count(bit_accuracy,success_chance,grover_op,eig_state=None,n=None):
     N = 2**n
     M = N * math.cos(theta/2)**2
 
-    err = (math.sqrt(2*M*N) + N/(2**(bit_accuracy+1)))*(2**(-bit_accuracy))
-    
+    # err = (math.sqrt(2*M*N) + N/(2**(bit_accuracy+1)))*(2**(-bit_accuracy)) #
+    err = (math.sqrt(M*N) + N/(2**(bit_accuracy+2)))*(2**(-bit_accuracy))
+
     return M, theta, err
