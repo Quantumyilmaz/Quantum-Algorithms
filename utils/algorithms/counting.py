@@ -39,9 +39,9 @@ def get_count(bit_accuracy,success_chance,grover_op,eig_state=None,n=None):
     theta = results['phase']
 
     N = 2**n
-    M = N * math.cos(theta/2)**2
+    M = N * math.cos(theta/2)**2 # we use cos instead if sin because see above.
 
     # err = (math.sqrt(2*M*N) + N/(2**(bit_accuracy+1)))*(2**(-bit_accuracy)) #
-    err = (math.sqrt(M*N) + N/(2**(bit_accuracy+2)))*(2**(-bit_accuracy))
+    err = (math.sqrt(M*N) + N/(2**(bit_accuracy+2)))*(2**(-bit_accuracy)) # max error
 
     return M, theta, err
