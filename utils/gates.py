@@ -135,7 +135,23 @@ def PhaseEstimatorGate(unitary,t):
 
 
 
+######## GreaterThan check ################################################################
+# nachkommas = 3
+# t = math.ceil(np.log2(10)*nachkommas) + 1 + math.ceil(np.log2(2 + 0.5/0.99))
+# n1 = 0.133
+# n2 = 0.134
 
+# n = 2*(1+t) + 1
+# assert n<30,n
+# circ = QuantumCircuit(n)
+# circ.x([0,t+1])
+# circ.compose(PhaseEstimatorGate(PhaseGate(n1),t),[*range(t+1)],inplace=True)
+# circ.compose(PhaseEstimatorGate(PhaseGate(n2),t),[*range(t+1,n-1)],inplace=True)
+# circ.compose(GreaterThanGate(t),[*range(1,t+1)]+[*range(t+1+1,2*t+1+1)]+[n-1],inplace=True)
+
+# counts = get_counts(circ,[-1])
+# max(counts,key=counts.get)
+#################################################################################
 
 
 def qand():

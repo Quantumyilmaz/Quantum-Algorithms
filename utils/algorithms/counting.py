@@ -29,7 +29,7 @@ def get_count(bit_accuracy,success_chance,grover_op,eig_state=None,n=None):
     if eig_state is None:
         eig_state = get_eigstate(n)
     t = get_t(bit_accuracy,success_chance)
-    assert t + grover_op.num_qubits < 26, t + grover_op.num_qubits
+    assert t + grover_op.num_qubits < 30, t + grover_op.num_qubits
 
     print('t: ',t,'grover_op.num_qubits: ',grover_op.num_qubits)
 
