@@ -13,13 +13,13 @@ unitary = qiskit.Aer.get_backend('unitary_simulator')
 simulator = qiskit.Aer.get_backend("qasm_simulator")
 
 def execute_circ(circ,qubits=None,backend=simulator,**kwargs):
-
+    temp_circ = circ.copy()
     if qubits is not None and circ.num_clbits == 0:
         cr = ClassicalRegister(len(qubits))
-        circ.add_register(cr)
-        circ.measure(qubits,circ.clbits)
+        temp_circ.add_register(cr)
+        temp_circ.measure(qubits,temp_circ.clbits)
 
-    return qiskit.execute(circ,backend=backend,**kwargs).result()
+    return qiskit.execute(temp_circ,backend=backend,**kwargs).result()
     
 def basis_change(circ,gate,apply_to_these_qubits=None,use_inverse_gate=False):
     
@@ -80,3 +80,20 @@ def matrix_to_gate(unitary_mat,to_gate=True):
     circ.unitary(unitary_mat,circ.qubits)
 
     return circ.to_gate() if to_gate else circ
+
+def float2binary(number,bit_accuracy):
+    assert number<1 and  0<=number
+    bits = ''
+    for i in range(bit_accuracy):
+        if number - 2**-(i+1) > 0:
+            number -= 2**-(i+1)
+            bits+='1'
+        else:
+            bits+='0'
+    return bits
+
+def bits2float(bits):
+    result = 0
+    for i,k in enumerate(bits):
+        result += int(k)*2**-(i+1)
+    return result
