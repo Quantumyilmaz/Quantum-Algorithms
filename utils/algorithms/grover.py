@@ -6,7 +6,7 @@ import math
 import numpy as np
 from qiskit import QuantumCircuit
 from utils.misc import basis_change,get_counts,values_to_phase_matrix,float2binary
-from utils.gates import PhaseEstimatorGate
+from utils.gates import PhaseEstimatorGate,GreaterThanGate
 
 def state_parser(state):
     if isinstance(state,int):
@@ -143,8 +143,10 @@ def QES(n_iqb,grover_eigstate,grover_op,f_check,lambda_=8/7):
     assert 1<lambda_<4/3
     m = 1
     solution_found = False
-    while not solution_found:
+    oracle_calls = 0
+    while not solution_found and oracle_calls<10*np.sqrt(2**n_iqb):
         t_grover = np.random.randint(0,m)
+        oracle_calls+=t_grover
         circ = Grover(t_grover=t_grover,grover_eigstate=grover_eigstate,grover_op=grover_op)
         counts = get_counts(circ,circ.qubits[:n_iqb],shots=1)
         index_ = int(max(counts, key=counts.get)[::-1],2)
@@ -152,12 +154,10 @@ def QES(n_iqb,grover_eigstate,grover_op,f_check,lambda_=8/7):
             solution_found = True
         else:
             m = min(m*lambda_,np.sqrt(2**n_iqb))
-    return index_
+    return index_ , oracle_calls
 
 # Quantum Conditional Slicing
 def QCS(values,threshold,condition_gate,f_check=None,t_grover=None,**kwargs):
-
-    assert f_check is not None or t_grover is not None
 
     n_iqb = int(math.log2(len(values)))
     assert n_iqb == math.log2(len(values))
@@ -178,7 +178,9 @@ def QCS(values,threshold,condition_gate,f_check=None,t_grover=None,**kwargs):
     grover_op = basis_change(grover_op,PhaseEstimatorGate(unitary,t),qubits=[*range(n_iqb+t)],use_inverse_gate=True)
     grover_op = get_grover_op(oracle=grover_op,n_iqb=n_iqb)
     
-    if t_grover is None:
+    if t_grover is None and f_check is None:
+        return grover_eigstate,grover_op
+    elif t_grover is None:
         return QES(n_iqb=n_iqb,grover_eigstate=grover_eigstate,grover_op=grover_op,f_check=f_check,**kwargs)
     else:
         return Grover(t_grover=t_grover,grover_eigstate=grover_eigstate,grover_op=grover_op)
@@ -186,12 +188,10 @@ def QCS(values,threshold,condition_gate,f_check=None,t_grover=None,**kwargs):
 # multi-Quantum Conditional Slicing
 def mQCS(mValues:list,mThresholds:list,mConditionGates:list,f_check=None,t_grover=None,**kwargs):
 
-    assert f_check is not None or t_grover is not None
-
     no_of_conditions = len(mConditionGates)
     
     n_iqb = int(math.log2(len(mValues[0])))
-    assert n_iqb == math.log2(len(mValues[0]))
+    assert n_iqb == math.log2(len(mValues[0])) , [n_iqb,len(mValues[0])]
 
     t = (mConditionGates[0].num_qubits - 1)//2
     
@@ -240,13 +240,26 @@ def mQCS(mValues:list,mThresholds:list,mConditionGates:list,f_check=None,t_grove
 
     grover_op.compose(get_diffuser(n_iqb).to_gate(),grover_op.qubits[:n_iqb],inplace=True)
 
-    if t_grover is None:
+    if t_grover is None and f_check is None:
+        return grover_eigstate,grover_op
+    elif t_grover is None:
         return QES(n_iqb=n_iqb,grover_eigstate=grover_eigstate,grover_op=grover_op,f_check=f_check,**kwargs)
     else:
         return Grover(t_grover=t_grover,grover_eigstate=grover_eigstate,grover_op=grover_op)
 
 # Grover Adaptive Search
-def GAS(n_iqb,grover_eigstate,grover_op,f_check,*f_check_args,**kwargs):
-    N = 2**n_iqb
+def GAS(values,d):
+    N = len(values)
+    n_iqb = int(math.log2(N))
+    assert n_iqb == math.log2(N)
+
+    total_oracle_calls = 0
     threshold_index = np.random.choice([*range(N)])
-    pass
+    while total_oracle_calls <= 22.5 * np.sqrt(N)+1.4*np.log2(N)**2:
+        grover_eigstate,grover_op = QCS(values=values,threshold=values[threshold_index],condition_gate=GreaterThanGate(math.ceil(-math.log2(d))))
+        index_ , oracle_calls = QES(n_iqb=n_iqb,grover_eigstate=grover_eigstate,grover_op=grover_op,f_check=lambda x: values[x]>values[threshold_index])
+        total_oracle_calls += oracle_calls
+        if values[index_]>values[threshold_index]:
+            threshold_index = index_
+        # print(total_oracle_calls)
+    return threshold_index

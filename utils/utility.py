@@ -8,3 +8,6 @@ class HiddenPrints:
     def __exit__(self, exc_type, exc_val, exc_tb):
         sys.stdout.close()
         sys.stdout = self._original_stdout
+
+def mround(n,incr):
+    return (n//incr + int(n % incr > incr/2)) * incr
