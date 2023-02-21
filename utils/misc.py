@@ -21,24 +21,21 @@ def execute_circ(circ,qubits=None,backend=simulator,**kwargs):
 
     return qiskit.execute(temp_circ,backend=backend,**kwargs).result()
     
-def basis_change(circ,gate,apply_to_these_qubits=None,use_inverse_gate=False):
+def basis_change(circ,gate,use_inverse_gate=False,*args,**kwargs):
     
     qc = QuantumCircuit(circ.num_qubits)
-
-    if apply_to_these_qubits is None:
-        apply_to_these_qubits = range(qc.num_qubits)
     
     if isinstance(gate,str):
-        getattr(qc,gate)(apply_to_these_qubits)
+        getattr(qc,gate)(*args,**kwargs)
         qc.compose(circ,inplace=True)
-        getattr(qc,gate)(apply_to_these_qubits)
+        getattr(qc,gate)(*args,**kwargs)
     else:
-        qc.compose(gate,apply_to_these_qubits,inplace=True)
+        qc.compose(gate,*args,inplace=True)
         qc.compose(circ,inplace=True)
         if use_inverse_gate:
-            qc.compose(gate.inverse(),apply_to_these_qubits,inplace=True)
+            qc.compose(gate.inverse(),*args,**kwargs,inplace=True)
         else:
-            qc.compose(gate,apply_to_these_qubits,inplace=True)
+            qc.compose(gate,*args,**kwargs,inplace=True)
     return qc
 
 
@@ -97,3 +94,8 @@ def bits2float(bits):
     for i,k in enumerate(bits):
         result += int(k)*2**-(i+1)
     return result
+
+def values_to_phase_matrix(values):
+    assert np.all([1>val>=0 for val in values])
+    unitary = np.diag([np.e**(1j*2*math.pi*i) for i in values])
+    return matrix_to_gate(unitary_mat=unitary,to_gate=True)

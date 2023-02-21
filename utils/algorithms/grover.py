@@ -2,9 +2,11 @@
 # Year: 2022
 # Grover's Algorithm
 
+import math
 import numpy as np
 from qiskit import QuantumCircuit
-from utils.misc import basis_change
+from utils.misc import basis_change,get_counts,values_to_phase_matrix,float2binary
+from utils.gates import PhaseEstimatorGate
 
 def state_parser(state):
     if isinstance(state,int):
@@ -40,8 +42,8 @@ def get_diffuser(n):
     qc.h(-1)
     qc.mct(qc.qubits[:-1],-1)
     qc.h(-1)
-    qc = basis_change(qc,'x')
-    qc = basis_change(qc,'h')
+    qc = basis_change(qc,'x',False,[*range(qc.num_qubits)])
+    qc = basis_change(qc,'h',False,[*range(qc.num_qubits)])
     return qc
 
 # def get_diffuser(nqubits):
@@ -68,12 +70,25 @@ def get_diffuser(n):
 #     U_s.name = "U$_s$"
 #     return U_s
 
-def get_grover_op(oracle):
+def get_grover_op(oracle,n_iqb=None):
     n = len(oracle.qubits)
     grover = QuantumCircuit(n)
     grover.compose(oracle,inplace=True)
-    grover.compose(get_diffuser(n),inplace=True)
+    grover.compose(get_diffuser(n if n_iqb is None else n_iqb),inplace=True)
     return grover
+
+def get_grover_eigenstate(n,n_iqb):
+    """
+    The top qubits are chosen as index qubits. 
+    The bottom qubit is turned into |->, ready to be marked by phase kickback.
+
+    n: total number of qubits required by the eigenstate
+    n_iqb: number of index qubits.
+    """
+    grover_eigstate = QuantumCircuit(n)
+    grover_eigstate.x(-1)
+    grover_eigstate.h(grover_eigstate.qubits[:n_iqb]+[n-1])
+    return grover_eigstate
 
 def GroverSolver(good_states):
 
@@ -111,3 +126,127 @@ def GroverSolver(good_states):
         circ.append(grover.to_gate(),circ.qubits)
 
     return {'circuit':circ, 'states':states, 'grover_op': grover}
+
+# Grover's Algorithm
+def Grover(t_grover,grover_eigstate,grover_op):
+    circ = QuantumCircuit(grover_op.num_qubits)
+    circ.compose(grover_eigstate.to_gate(),inplace=True)
+    for _ in range(t_grover):
+        circ.compose(grover_op.to_gate(),inplace=True)
+    return circ
+
+# Quantum Exponential Search
+def QES(n_iqb,grover_eigstate,grover_op,f_check,lambda_=8/7):
+    """
+    n_iqb: Number of index qubits. 
+    """
+    assert 1<lambda_<4/3
+    m = 1
+    solution_found = False
+    while not solution_found:
+        t_grover = np.random.randint(0,m)
+        circ = Grover(t_grover=t_grover,grover_eigstate=grover_eigstate,grover_op=grover_op)
+        counts = get_counts(circ,circ.qubits[:n_iqb],shots=1)
+        index_ = int(max(counts, key=counts.get)[::-1],2)
+        if f_check(index_):
+            solution_found = True
+        else:
+            m = min(m*lambda_,np.sqrt(2**n_iqb))
+    return index_
+
+# Quantum Conditional Slicing
+def QCS(values,threshold,condition_gate,f_check=None,t_grover=None,**kwargs):
+
+    assert f_check is not None or t_grover is not None
+
+    n_iqb = int(math.log2(len(values)))
+    assert n_iqb == math.log2(len(values))
+
+    t = (condition_gate.num_qubits - 1)//2
+    n = n_iqb + 2*t + 1
+
+    grover_eigstate = get_grover_eigenstate(n=n,n_iqb=n_iqb)
+    threshold_bits = float2binary(threshold,t)
+    for k,i in enumerate(threshold_bits[::-1]):
+        temp = int(i)
+        if temp:
+            grover_eigstate.x(t+n_iqb+k)
+
+    unitary = values_to_phase_matrix(values=values)
+    grover_op = QuantumCircuit(n)
+    grover_op.compose(condition_gate,[*range(n_iqb,t+n_iqb)]+[*range(t+n_iqb,2*t+n_iqb)]+[n-1],inplace=True)
+    grover_op = basis_change(grover_op,PhaseEstimatorGate(unitary,t),qubits=[*range(n_iqb+t)],use_inverse_gate=True)
+    grover_op = get_grover_op(oracle=grover_op,n_iqb=n_iqb)
+    
+    if t_grover is None:
+        return QES(n_iqb=n_iqb,grover_eigstate=grover_eigstate,grover_op=grover_op,f_check=f_check,**kwargs)
+    else:
+        return Grover(t_grover=t_grover,grover_eigstate=grover_eigstate,grover_op=grover_op)
+
+# multi-Quantum Conditional Slicing
+def mQCS(mValues:list,mThresholds:list,mConditionGates:list,f_check=None,t_grover=None,**kwargs):
+
+    assert f_check is not None or t_grover is not None
+
+    no_of_conditions = len(mConditionGates)
+    
+    n_iqb = int(math.log2(len(mValues[0])))
+    assert n_iqb == math.log2(len(mValues[0]))
+
+    t = (mConditionGates[0].num_qubits - 1)//2
+    
+    n = n_iqb + 2*t + 1
+    n_all = n*no_of_conditions
+
+    grover_eigstate = get_grover_eigenstate(n=n_all+1,n_iqb=n_iqb)
+    for l,threshold in enumerate(mThresholds):
+        threshold_bits = float2binary(threshold,t)
+        for k,i in enumerate(threshold_bits[::-1]):
+            temp = int(i)
+            if temp:
+                grover_eigstate.x(l*n+t+n_iqb+k)
+
+    grover_op = QuantumCircuit(n_all+1)
+    
+    # grover_op.mcx([*range(n-1,n_all,n)],[n_all])
+    # for i,(values,condition_gate) in enumerate(zip(mValues,mConditionGates)):
+    #     grover_op = basis_change(grover_op,condition_gate.copy(),qubits=[*range(n*i+n_iqb,n*(i+1))],use_inverse_gate=True)
+    #     phase_est = PhaseEstimatorGate(values_to_phase_matrix(values=values),t)
+    #     grover_op = basis_change(grover_op,phase_est.copy(),qubits=[*range(i*n,i*n+n_iqb+t)],use_inverse_gate=True)
+    # for i in range(no_of_conditions-1):
+    #     for k in range(n_iqb):
+    #         grover_op = basis_change(grover_op,'cx',False,k,(i+1)*n+k)
+
+    # TODO Implement this with basis change function
+    for i in range(no_of_conditions-1):
+        for k in range(n_iqb):
+            grover_op.cx(k,(i+1)*n+k)
+
+    for i,(values,condition_gate) in enumerate(zip(mValues,mConditionGates)):
+        phase_est = PhaseEstimatorGate(values_to_phase_matrix(values=values),t)
+        grover_op.compose(phase_est.copy(),[*range(i*n,i*n+n_iqb+t)],inplace=True)
+        grover_op.compose(condition_gate.copy(),[*range(n*i+n_iqb,n*i+n)],inplace=True)
+
+    grover_op.mcx([*range(n-1,n_all,n)],[n_all])
+
+    for i,(values,condition_gate) in enumerate(zip(mValues,mConditionGates)):
+        phase_est = PhaseEstimatorGate(values_to_phase_matrix(values=values),t)
+        grover_op.compose(condition_gate.copy().inverse(),[*range(n*i+n_iqb,n*i+n)],inplace=True)
+        grover_op.compose(phase_est.copy().inverse(),[*range(i*n,i*n+n_iqb+t)],inplace=True)
+
+    for i in range(no_of_conditions-1):
+        for k in range(n_iqb):
+            grover_op.cx(k,(i+1)*n+k)
+
+    grover_op.compose(get_diffuser(n_iqb).to_gate(),grover_op.qubits[:n_iqb],inplace=True)
+
+    if t_grover is None:
+        return QES(n_iqb=n_iqb,grover_eigstate=grover_eigstate,grover_op=grover_op,f_check=f_check,**kwargs)
+    else:
+        return Grover(t_grover=t_grover,grover_eigstate=grover_eigstate,grover_op=grover_op)
+
+# Grover Adaptive Search
+def GAS(n_iqb,grover_eigstate,grover_op,f_check,*f_check_args,**kwargs):
+    N = 2**n_iqb
+    threshold_index = np.random.choice([*range(N)])
+    pass
