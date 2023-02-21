@@ -79,7 +79,7 @@ def matrix_to_gate(unitary_mat,to_gate=True):
     return circ.to_gate() if to_gate else circ
 
 def float2binary(number,bit_accuracy):
-    assert number<1 and  0<=number
+    assert number<1 and  0<=number,number
     bits = ''
     for i in range(bit_accuracy):
         if number - 2**-(i+1) > 0:
