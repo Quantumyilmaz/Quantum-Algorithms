@@ -14,3 +14,4 @@ QAIF_PortfOpt_analysis copy.ipynb
 QAIF_PortfOpt_old.ipynb
 QAIF/backups/QAIF_PortfOpt_21_02_23.ipynb
 .DS_Store
+utils/arithmetic/__pycache__/qft_arithmetic.cpython-311.pyc
