@@ -5,7 +5,7 @@
 import math
 from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import PhaseEstimation
-from utils.misc import simulator,execute_circ
+from utils.misc import backend_simulator,execute_circ
 
 
 def get_t(bit_accuracy,min_success_chance):
@@ -36,7 +36,7 @@ def get_phase_estimation(eig_state,unitary,t):
     circuit = get_phase_estimator(eig_state,unitary,t)
     circuit.measure(circuit.qubits[:t],circuit.clbits)
     
-    counts = execute_circ(circuit,simulator).get_counts(circuit)
+    counts = execute_circ(circuit,backend_simulator).get_counts(circuit)
 
     return {'phase':2 * math.pi * int(max(counts,key=counts.get)[::-1],2)/2**t,
                 'counts':counts,
