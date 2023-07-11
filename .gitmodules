@@ -1,0 +1,3 @@
+[submodule "EchoStateNetwork"]
+	path = EchoStateNetwork
+	url = https://github.com/Quantumyilmaz/EchoStateNetwork
