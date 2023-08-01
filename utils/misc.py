@@ -8,11 +8,11 @@ import numpy as np
 import qiskit
 from qiskit import QuantumCircuit,ClassicalRegister
 
-vector = qiskit.Aer.get_backend('statevector_simulator') 
-unitary = qiskit.Aer.get_backend('unitary_simulator') 
-simulator = qiskit.Aer.get_backend("qasm_simulator")
+backend_vector = qiskit.Aer.get_backend('statevector_simulator') 
+backend_unitary = qiskit.Aer.get_backend('unitary_simulator') 
+backend_simulator = qiskit.Aer.get_backend("qasm_simulator")
 
-def execute_circ(circ,qubits=None,backend=simulator,**kwargs):
+def execute_circ(circ,qubits=None,backend=backend_simulator,**kwargs):
     temp_circ = circ.copy()
     if qubits is not None and circ.num_clbits == 0:
         cr = ClassicalRegister(len(qubits))
@@ -77,6 +77,12 @@ def matrix_to_gate(unitary_mat,to_gate=True):
     circ.unitary(unitary_mat,circ.qubits)
 
     return circ.to_gate() if to_gate else circ
+
+def get_unitary(circ):
+    return execute_circ(circ,backend=backend_unitary).get_unitary()
+
+def get_bloch_vector(circ):
+    return execute_circ(circ,backend=backend_vector).get_statevector()
 
 def float2binary(number,bit_accuracy):
     assert number<1 and  0<=number,number
